@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
-  "name": "My first app",
+  "name": "Skylight",
   "version": "1",
   "page_action": {
   },
   "chrome_url_overrides" : {
-    "chrome://newtab": "skylight.html"
+    "newtab": "skylight.html"
   },
   "offline_enabled": true
 }
