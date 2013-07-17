@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
-  "name": "Skylight",
+  "name": "WindowShade",
   "version": "1",
   "page_action": {
   },
   "chrome_url_overrides" : {
-    "newtab": "skylight.html"
+    "newtab": "windowshade.html"
   },
   "offline_enabled": true
 }

@@ -1,0 +1,14 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ddd;
+}
+
+#time {
+  margin-top: 10%;
+  font-size: 100px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  color: #222;
+  width: 100%;
+  text-align: center;
+}
