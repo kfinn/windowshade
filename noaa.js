@@ -1,22 +1,23 @@
-var noaa = {};
+noaa = {};
 
-(function() {
+// (function() {
 function calculate(date, lat, lng) {
+  date.utc();
   var jday = getJD(date);
   var tl = getTimeLocal(date);
-  var tz = date.getTimezoneOffset();
-  var dst = date.isDST();
-  var total = jday + tl/1440.0 - tz/1440.0;
-  var T = calcTimeJulianCent(total)
-  var solarNoon = calcSolNoon(jday, lng, tz)
-  var rise = calcSunriseSet(1, jday, lat, lng, tz)
-  var set  = calcSunriseSet(0, jday, lat, lng, tz)
+  var total = jday + tl/1440.0;
+  var T = calcTimeJulianCent(total);
+  var rise = calcSunriseSet(1, jday, lat, lng);
+  var riseDate = calcDateFromJD(rise.JD).add('minutes', rise.minutes);
+  riseDate.local();
+  var set  = calcSunriseSet(0, jday, lat, lng);
+  var setDate = calcDateFromJD(set.JD).add('minutes', set.minutes);
+  setDate.local();
   return {
-    sunrise: rise,
-    solarNoon: solarNoon,
-    sunset: set
+    sunrise: riseDate,
+    sunset: setDate
   };
-}
+};
 noaa.calculate = calculate;
 
 function calcTimeJulianCent(jd)
@@ -36,8 +37,7 @@ function isLeapYear(yr)
   return ((yr % 4 == 0 && yr % 100 != 0) || yr % 400 == 0);
 };
 
-function calcDoyFromJD(jd)
-{
+function calcDateFromJD(jd) {
   var z = Math.floor(jd + 0.5);
   var f = (jd + 0.5) - z;
   if (z < 2299161) {
@@ -54,9 +54,13 @@ function calcDoyFromJD(jd)
   var month = (E < 14) ? E - 1 : E - 13;
   var year = (month > 2) ? C - 4716 : C - 4715;
 
-  var k = (isLeapYear(year) ? 1 : 2);
-  var doy = Math.floor((275 * month)/9) - k * Math.floor((month + 9)/12) + day -30;
-  return doy;
+  var result = moment.utc().years(year).months(month - 1).date(day).hours(0).minutes(0).seconds(0);
+  return result;
+}
+
+function calcDoyFromJD(jd)
+{
+  return calcDateFromJD().dayOfYear();
 };
 
 function radToDeg(angleRad) 
@@ -228,9 +232,9 @@ function isNumber(inputVal)
 
 function getJD(date)
 {
-  var docmonth = date.getMonth() + 1;
-  var docday =   date.getDate();
-  var docyear =  date.getFullYear();
+  var docmonth = date.month() + 1;
+  var docday =   date.date();
+  var docyear =  date.year();
   if (docmonth <= 2) {
     docyear -= 1
     docmonth += 12
@@ -243,181 +247,15 @@ function getJD(date)
 
 function getTimeLocal(date)
 {
-  var dochr = d.getHours();
-  var docmn = d.getMinutes();
-  var docsc = d.getSeconds();
-  var docdst = d.isDST();
+  var dochr = date.hours();
+  var docmn = date.minutes();
+  var docsc = date.seconds();
+  var docdst = date.isDST();
   if (docdst) {
     dochr -= 1
   }
   var mins = dochr * 60 + docmn + docsc/60.0
   return mins
-}
-
-function calcAzEl(T, localtime, latitude, longitude, zone)
-{
-  var eqTime = calcEquationOfTime(T)
-  var theta  = calcSunDeclination(T)
-  var solarTimeFix = eqTime + 4.0 * longitude - 60.0 * zone
-  var earthRadVec = calcSunRadVector(T)
-  var trueSolarTime = localtime + solarTimeFix
-  while (trueSolarTime > 1440)
-  {
-    trueSolarTime -= 1440
-  }
-  var hourAngle = trueSolarTime / 4.0 - 180.0;
-  if (hourAngle < -180) 
-  {
-    hourAngle += 360.0
-  }
-  var haRad = degToRad(hourAngle)
-  var csz = Math.sin(degToRad(latitude)) * Math.sin(degToRad(theta)) + Math.cos(degToRad(latitude)) * Math.cos(degToRad(theta)) * Math.cos(haRad)
-  if (csz > 1.0) 
-  {
-    csz = 1.0
-  } else if (csz < -1.0) 
-  { 
-    csz = -1.0
-  }
-  var zenith = radToDeg(Math.acos(csz))
-  var azDenom = ( Math.cos(degToRad(latitude)) * Math.sin(degToRad(zenith)) )
-  if (Math.abs(azDenom) > 0.001) {
-    azRad = (( Math.sin(degToRad(latitude)) * Math.cos(degToRad(zenith)) ) - Math.sin(degToRad(theta))) / azDenom
-    if (Math.abs(azRad) > 1.0) {
-      if (azRad < 0) {
-	azRad = -1.0
-      } else {
-	azRad = 1.0
-      }
-    }
-    var azimuth = 180.0 - radToDeg(Math.acos(azRad))
-    if (hourAngle > 0.0) {
-      azimuth = -azimuth
-    }
-  } else {
-    if (latitude > 0.0) {
-      azimuth = 180.0
-    } else { 
-      azimuth = 0.0
-    }
-  }
-  if (azimuth < 0.0) {
-    azimuth += 360.0
-  }
-  var exoatmElevation = 90.0 - zenith
-
-// Atmospheric Refraction correction
-
-  if (exoatmElevation > 85.0) {
-    var refractionCorrection = 0.0;
-  } else {
-    var te = Math.tan (degToRad(exoatmElevation));
-    if (exoatmElevation > 5.0) {
-      var refractionCorrection = 58.1 / te - 0.07 / (te*te*te) + 0.000086 / (te*te*te*te*te);
-    } else if (exoatmElevation > -0.575) {
-      var refractionCorrection = 1735.0 + exoatmElevation * (-518.2 + exoatmElevation * (103.4 + exoatmElevation * (-12.79 + exoatmElevation * 0.711) ) );
-    } else {
-      var refractionCorrection = -20.774 / te;
-    }
-    refractionCorrection = refractionCorrection / 3600.0;
-  }
-
-  var solarZen = zenith - refractionCorrection;
-
-  if ((output) && (solarZen > 108.0) ) {
-    document.getElementById("azbox").value = "dark"
-    document.getElementById("elbox").value = "dark"
-  } else if (output) {
-    document.getElementById("azbox").value = Math.floor(azimuth*100 +0.5)/100.0
-    document.getElementById("elbox").value = Math.floor((90.0-solarZen)*100+0.5)/100.0
-    if (document.getElementById("showae").checked) {
-      showLineGeodesic("#ffff00", azimuth)
-    }
-  }
-  return (azimuth)
-}
-
-function calcSolNoon(jd, longitude, timezone)
-{
-  var tnoon = calcTimeJulianCent(jd - longitude/360.0)
-  var eqTime = calcEquationOfTime(tnoon)
-  var solNoonOffset = 720.0 - (longitude * 4) - eqTime // in minutes
-  var newt = calcTimeJulianCent(jd + solNoonOffset/1440.0)
-  eqTime = calcEquationOfTime(newt)
-  solNoonLocal = 720 - (longitude * 4) - eqTime + (timezone*60.0)// in minutes
-  while (solNoonLocal < 0.0) {
-    solNoonLocal += 1440.0;
-  }
-  while (solNoonLocal >= 1440.0) {
-    solNoonLocal -= 1440.0;
-  }
-  document.getElementById("noonbox").value = timeString(solNoonLocal, 3)
-}
-
-function dayString(jd, next, flag)
-{
-// returns a string in the form DDMMMYYYY[ next] to display prev/next rise/set
-// flag=2 for DD MMM, 3 for DD MM YYYY, 4 for DDMMYYYY next/prev
-  if ( (jd < 900000) || (jd > 2817000) ) {
-    var output = "error"
-  } else {
-  var z = Math.floor(jd + 0.5);
-  var f = (jd + 0.5) - z;
-  if (z < 2299161) {
-    var A = z;
-  } else {
-    alpha = Math.floor((z - 1867216.25)/36524.25);
-    var A = z + 1 + alpha - Math.floor(alpha/4);
-  }
-  var B = A + 1524;
-  var C = Math.floor((B - 122.1)/365.25);
-  var D = Math.floor(365.25 * C);
-  var E = Math.floor((B - D)/30.6001);
-  var day = B - D - Math.floor(30.6001 * E) + f;
-  var month = (E < 14) ? E - 1 : E - 13;
-  var year = ((month > 2) ? C - 4716 : C - 4715);
-  if (flag == 2)
-    var output = zeroPad(day,2) + " " + monthList[month-1].abbr;
-  if (flag == 3)
-    var output = zeroPad(day,2) + monthList[month-1].abbr + year.toString();
-  if (flag == 4)
-    var output = zeroPad(day,2) + monthList[month-1].abbr + year.toString() + ((next) ? " next" : " prev");
-  }
-  return output;
-}
-
-function timeDateString(JD, minutes)
-{
-  var output = timeString(minutes, 2) + " " + dayString(JD, 0, 2);
-  return output;
-}
-
-function timeString(minutes, flag)
-// timeString returns a zero-padded string (HH:MM:SS) given time in minutes
-// flag=2 for HH:MM, 3 for HH:MM:SS
-{
-  if ( (minutes >= 0) && (minutes < 1440) ) {
-    var floatHour = minutes / 60.0;
-    var hour = Math.floor(floatHour);
-    var floatMinute = 60.0 * (floatHour - Math.floor(floatHour));
-    var minute = Math.floor(floatMinute);
-    var floatSec = 60.0 * (floatMinute - Math.floor(floatMinute));
-    var second = Math.floor(floatSec + 0.5);
-    if (second > 59) {
-      second = 0
-      minute += 1
-    }
-    if ((flag == 2) && (second >= 30)) minute++;
-    if (minute > 59) {
-      minute = 0
-      hour += 1
-    }
-    var output = zeroPad(hour,2) + ":" + zeroPad(minute,2);
-    if (flag > 2) output = output + ":" + zeroPad(second,2);
-  } else { 
-    var output = "error"
-  }
-  return output;
 }
 
 function calcSunriseSetUTC(rise, JD, latitude, longitude)
@@ -432,21 +270,18 @@ function calcSunriseSetUTC(rise, JD, latitude, longitude)
   return timeUTC
 }
 
-function calcSunriseSet(rise, JD, latitude, longitude, timezone)
+function calcSunriseSet(rise, JD, latitude, longitude)
 // rise = 1 for sunrise, 0 for sunset
 {
-  var id = ((rise) ? "risebox" : "setbox")
   var timeUTC = calcSunriseSetUTC(rise, JD, latitude, longitude);
   var newTimeUTC = calcSunriseSetUTC(rise, JD + timeUTC/1440.0, latitude, longitude); 
   if (isNumber(newTimeUTC)) {
-    var timeLocal = newTimeUTC + (timezone * 60.0)
-    if (document.getElementById(rise ? "showsr" : "showss").checked) {
-      var riseT = calcTimeJulianCent(JD + newTimeUTC/1440.0)
-      var riseAz = calcAzEl(riseT, timeLocal, latitude, longitude, timezone)
-      showLineGeodesic(rise ? "#66ff00" : "#ff0000", riseAz)
-    }
+    var timeLocal = newTimeUTC
     if ( (timeLocal >= 0.0) && (timeLocal < 1440.0) ) {
-      document.getElementById(id).value = timeString(timeLocal,2)
+      return {
+        JD: JD,
+        minutes: timeLocal
+      };
     } else  {
       var jday = JD
       var increment = ((timeLocal < 0) ? 1 : -1)
@@ -454,7 +289,10 @@ function calcSunriseSet(rise, JD, latitude, longitude, timezone)
         timeLocal += increment * 1440.0
 	jday -= increment
       }
-      document.getElementById(id).value = timeDateString(jday,timeLocal)
+      return {
+        JD: jday,
+        minutes: timeLocal
+      }
     }
   } else { // no sunrise/set found
     var doy = calcDoyFromJD(JD)
@@ -462,18 +300,24 @@ function calcSunriseSet(rise, JD, latitude, longitude, timezone)
 	((latitude < -66.4) && ((doy < 83) || (doy > 263))) )
     {   //previous sunrise/next sunset
       if (rise) { // find previous sunrise
-        jdy = calcJDofNextPrevRiseSet(0, rise, JD, latitude, longitude, timezone)
+        jdy = calcJDofNextPrevRiseSet(0, rise, JD, latitude, longitude)
       } else { // find next sunset
-        jdy = calcJDofNextPrevRiseSet(1, rise, JD, latitude, longitude, timezone)
+        jdy = calcJDofNextPrevRiseSet(1, rise, JD, latitude, longitude)
       }
-      document.getElementById(((rise)? "risebox":"setbox")).value = dayString(jdy,0,3)
+      return {
+        JD: jdy,
+        minutes: 0
+      }
     } else {   //previous sunset/next sunrise
       if (rise == 1) { // find previous sunrise
-        jdy = calcJDofNextPrevRiseSet(1, rise, JD, latitude, longitude, timezone)
+        jdy = calcJDofNextPrevRiseSet(1, rise, JD, latitude, longitude)
       } else { // find next sunset
-        jdy = calcJDofNextPrevRiseSet(0, rise, JD, latitude, longitude, timezone)
+        jdy = calcJDofNextPrevRiseSet(0, rise, JD, latitude, longitude)
       }
-      document.getElementById(((rise)? "risebox":"setbox")).value = dayString(jdy,0,3)
+      return {
+        JD: jdy,
+        minutes: 0
+      }
     }
   }
 }
@@ -497,4 +341,4 @@ function calcJDofNextPrevRiseSet(next, rise, JD, latitude, longitude, tz)
   }
   return julianday;
 }
-})();
+// })();

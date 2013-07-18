@@ -1,14 +1,33 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #ddd;
+  background-image: -webkit-linear-gradient(top, blue, white);
+  -webkit-animation: background-image 500ms;
+  text-align: center;
+}
+#container {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 #time {
-  margin-top: 10%;
-  font-size: 100px;
+  font-size: 185px;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   color: #222;
-  width: 100%;
-  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+  margin: auto;
+}
+
+#time:before,
+#time::before {
+  content: "";
+  width: 0;
+  height: 100%;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
 }

@@ -7,5 +7,6 @@
   "chrome_url_overrides" : {
     "newtab": "windowshade.html"
   },
+  "permissions" : ["geolocation"],
   "offline_enabled": true
 }
