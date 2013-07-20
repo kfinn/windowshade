@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "WindowShade",
+  "name": "Windowshade",
   "version": "1.0",
   "icons": {
     "128": "icon_128.png"
