@@ -11,3 +11,4 @@ This project has no external dependencies or build instructions, just HTML, CSS,
 # Thanks
 
 The code used to calculate sunrise/sunset times is heavily based on code from the NOAA. It is contained in the file `noaa.js`.
+This project also uses [Moment.js](//www.momentjs.com), [jQuery](//www.jquery.com).
