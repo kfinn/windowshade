@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "WindowShade",
-  "version": "1",
+  "version": "1.0",
   "page_action": {
   },
   "chrome_url_overrides" : {
