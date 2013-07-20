@@ -2,7 +2,8 @@
   "manifest_version": 2,
   "name": "WindowShade",
   "version": "1.0",
-  "page_action": {
+  "icons": {
+    "128": "icon_128.png"
   },
   "chrome_url_overrides" : {
     "newtab": "windowshade.html"

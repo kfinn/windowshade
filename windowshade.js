@@ -48,9 +48,7 @@ jQuery(function($) {
       'rgb(' + gradients[lowerIndex].start + '), rgb(' + gradients[lowerIndex].end + '))';
   }
 
-  function updateTime() {
-    timeDiv.text(moment().format('LT'));
-  
+  function updateTime() {  
     var now = moment();
     var todaySunData = noaaHere(now);
     var timeSpanStart, timeSpanEnd;
@@ -93,6 +91,7 @@ jQuery(function($) {
   
     var completed = elapsed/total;
     container.css('background-image', getBackground(completed));
+    timeDiv.text(now.format('LT'));
   }
   
   function setDark(newDark) {

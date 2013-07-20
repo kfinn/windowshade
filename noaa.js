@@ -12,6 +12,7 @@ function calculate(date, lat, lng) {
   riseDate.local();
   var set  = calcSunriseSet(0, jday, lat, lng);
   var setDate = calcDateFromJD(set.JD).add('minutes', set.minutes);
+  date.local();
   setDate.local();
   return {
     sunrise: riseDate,
