@@ -10,10 +10,6 @@ var gradients = [
 ]
 
 jQuery(function($) {
-  // var lastSunrise = moment();
-  // var sunset = moment(lastSunrise).add(14, 'seconds');
-  // var nextSunrise = moment(lastSunrise).add(24, 'seconds');
-    
   // set default starting position
   var position = {coords:{
     latitude: 40.7121681,
@@ -69,22 +65,6 @@ jQuery(function($) {
       timeSpanEnd = tomorrowSunData.sunrise;
       setDark(true);
     }
-  
-    //debug
-    // if (now.isAfter(nextSunrise)) {
-    //   lastSunrise.add(24, 'seconds');
-    //   sunset.add(24, 'seconds');
-    //   nextSunrise.add(24, 'seconds');
-    // }
-    // if (now.isBefore(sunset)) {
-    //    timeSpanStart = lastSunrise;
-    //    timeSpanEnd =  sunset;
-    //    setDark(false);
-    // } else {
-    //   timeSpanStart = sunset;
-    //   timeSpanEnd = nextSunrise
-    //   setDark(true);
-    // }
   
     var elapsed = now.diff(timeSpanStart, 'milliseconds');
     var total = timeSpanEnd.diff(timeSpanStart, 'milliseconds');
