@@ -1,8 +1,6 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: -webkit-linear-gradient(top, blue, white);
-  -webkit-animation: background-image 500ms;
   text-align: center;
 }
 #container {
@@ -10,15 +8,28 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
+  -webkit-transition: background-image 0.5s;
+  transition: background-image 0.5s;
 }
 
 #time {
   font-size: 185px;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  color: #222;
+  font-family: "HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   display: inline-block;
   vertical-align: middle;
   margin: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-transition-property: color, text-shadow;
+  -webkit-transition-duration: 0.5s;
+  transition-property: color, text-shadow;
+  transition-duration: 0.5s;
+  color: #222;
+}
+
+#time.dark {
+  color: #ddd;
+  text-shadow: 0 0 10px #222;
 }
 
 #time:before,

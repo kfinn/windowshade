@@ -1,9 +1,27 @@
+var gradients = [
+  {type: '-webkit-radial-gradient(bottom center, circle, ', start: '255, 215, 165', end: '41, 41, 221'},
+  {type: '-webkit-radial-gradient(top center, circle, ', start: '187, 187, 255', end: '87, 134, 255'},
+  {type: '-webkit-radial-gradient(top center, circle, ', start: '87, 134, 255', end: '0, 0, 165'},
+  {type: '-webkit-radial-gradient(top center, circle, ', start: '55, 95, 162', end: '0, 29, 105'},  
+  {type: '-webkit-radial-gradient(bottom center, circle, ', start: '165, 73, 0', end: '0, 29, 105'},
+  {type: '-webkit-linear-gradient(bottom, ', start: '12, 0, 48', end: '20, 20, 20'},
+  {type: '-webkit-linear-gradient(bottom, ', start: '0, 0, 48', end: '20, 20, 20'},
+  {type: '-webkit-linear-gradient(bottom, ', start: '0, 12, 48', end: '20, 20, 20'}
+]
+
 jQuery(function($) {
+  // var lastSunrise = moment();
+  // var sunset = moment(lastSunrise).add(14, 'seconds');
+  // var nextSunrise = moment(lastSunrise).add(24, 'seconds');
+    
   // set default starting position
   var position = {coords:{
     latitude: 40.7121681,
     longitude: -73.96068679999999
   }};
+  var timeDiv = $('#time');
+  var container = $('#container');
+  var dark = false;
   
   navigator.geolocation.getCurrentPosition(updatePosition);
   updateTime();
@@ -11,7 +29,6 @@ jQuery(function($) {
     
   function updatePosition(newPosition) {
     position = newPosition;
-    console.log(position);
     updateTime();
   }
   
@@ -19,38 +36,73 @@ jQuery(function($) {
     return noaa.calculate(d, position.coords.latitude, position.coords.longitude);
   }
   
-  function getBackground(light, elapsed) {
-    return '-webkit-linear-gradient(bottom, #8c3631, #ee9e52 10%, #eee 18%, #91add0 20%, #415e97 28%, #24253e)';
+  function getBackground(elapsed) {
+    var usableGradients = gradients.length / 2;
+    var lowerIndex = Math.floor(elapsed * usableGradients) + (dark ? usableGradients : 0);
+    var upperIndex = (lowerIndex + 1) % gradients.length;
+    var weight = elapsed * usableGradients - Math.floor(elapsed * usableGradients);
+    return gradients[upperIndex].type +
+      'rgba(' + gradients[upperIndex].start + ', ' + weight + '), ' +
+      'rgba(' + gradients[upperIndex].end + ', ' + weight + ')), ' +
+      gradients[lowerIndex].type +
+      'rgb(' + gradients[lowerIndex].start + '), rgb(' + gradients[lowerIndex].end + '))';
   }
 
   function updateTime() {
-    $('#time').text(moment().format('LT'));
-    
+    timeDiv.text(moment().format('LT'));
+  
     var now = moment();
     var todaySunData = noaaHere(now);
-    var light = true;
     var timeSpanStart, timeSpanEnd;
     if (now.isBefore(todaySunData.sunrise)) {
-      light = false;
       var yesterday = moment(now).subtract(1, 'day');
       var yesterdaySunData = noaaHere(yesterday);
       timeSpanStart = yesterdaySunData.sunset;
       timeSpanEnd = todaySunData.sunrise;
-    } else if (now.isAfter(todaySunData.sunset)) {
-      light = false;
+      setDark(true);
+    } else if (now.isBefore(todaySunData.sunset)) {
+      timeSpanStart = todaySunData.sunrise;
+      timeSpanEnd = todaySunData.sunset;
+      setDark(false);
+    } else {
       var tomorrow = moment(now).add(1, 'day');
       var tomorrowSunData = noaaHere(tomorrow);
       timeSpanStart = todaySunData.sunset;
       timeSpanEnd = tomorrowSunData.sunrise;
-    } else {
-      timeSpanStart = todaySunData.sunrise;
-      timeSpanEnd = todaySunData.sunset;
+      setDark(true);
     }
-    
+  
+    //debug
+    // if (now.isAfter(nextSunrise)) {
+    //   lastSunrise.add(24, 'seconds');
+    //   sunset.add(24, 'seconds');
+    //   nextSunrise.add(24, 'seconds');
+    // }
+    // if (now.isBefore(sunset)) {
+    //    timeSpanStart = lastSunrise;
+    //    timeSpanEnd =  sunset;
+    //    setDark(false);
+    // } else {
+    //   timeSpanStart = sunset;
+    //   timeSpanEnd = nextSunrise
+    //   setDark(true);
+    // }
+  
     var elapsed = now.diff(timeSpanStart, 'milliseconds');
     var total = timeSpanEnd.diff(timeSpanStart, 'milliseconds');
-    
+  
     var completed = elapsed/total;
-    $('body').css('background-image', getBackground(light, elapsed));
+    container.css('background-image', getBackground(completed));
+  }
+  
+  function setDark(newDark) {
+    if (newDark != dark) {
+      dark = newDark;
+      if (dark) {
+        timeDiv.addClass('dark');
+      } else {
+        timeDiv.removeClass('dark');
+      }
+    }
   }
 });
