@@ -45,7 +45,7 @@ jQuery(function($) {
   }
 
   function updateTime() {  
-    var now = window.now; //|| moment();
+    var now = moment(); // window.now || moment();
     var todaySunData = noaaHere(now);
     var timeSpanStart, timeSpanEnd;
     if (now.isBefore(todaySunData.sunrise)) {
