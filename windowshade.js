@@ -1,11 +1,11 @@
 var gradients = [
   {type: '-webkit-radial-gradient(bottom center, circle, ', start: '255, 215, 165', end: '41, 41, 221'},
   {type: '-webkit-radial-gradient(top center, circle, ', start: '187, 187, 255', end: '87, 134, 255'},
-  {type: '-webkit-radial-gradient(top center, circle, ', start: '87, 134, 255', end: '0, 0, 165'},
-  {type: '-webkit-radial-gradient(top center, circle, ', start: '55, 95, 162', end: '0, 29, 105'},  
+  {type: '-webkit-radial-gradient(top center, circle, ', start: '140, 140, 255', end: '87, 14, 255'},
+  {type: '-webkit-radial-gradient(top center, circle, ', start: '93, 93, 255', end: '30, 30, 220'},  
   {type: '-webkit-radial-gradient(bottom center, circle, ', start: '165, 73, 0', end: '0, 29, 105'},
-  {type: '-webkit-linear-gradient(bottom, ', start: '12, 0, 48', end: '20, 20, 20'},
-  {type: '-webkit-linear-gradient(bottom, ', start: '0, 0, 48', end: '20, 20, 20'},
+  {type: '-webkit-linear-gradient(bottom, ', start: '24, 0, 48', end: '20, 20, 20'},
+  {type: '-webkit-linear-gradient(bottom, ', start: '0, 0, 52', end: '20, 20, 20'},
   {type: '-webkit-linear-gradient(bottom, ', start: '0, 12, 48', end: '20, 20, 20'}
 ]
 
@@ -45,7 +45,7 @@ jQuery(function($) {
   }
 
   function updateTime() {  
-    var now = moment();
+    var now = window.now; //|| moment();
     var todaySunData = noaaHere(now);
     var timeSpanStart, timeSpanEnd;
     if (now.isBefore(todaySunData.sunrise)) {
