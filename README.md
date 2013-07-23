@@ -2,7 +2,7 @@
 
 # About
 
-This is the Windowshade Chrome Extension, soon to be available on the Chrome App Store.
+This is the Windowshade Chrome Extension, available [on the Chrome App Store](//chrome.google.com/webstore/detail/windowshade/hjjgbonlbpglkgemffbbjllpiifdcfga). Replaces the new tab page with a clock that shows the current color of the sky. Inspired by a night I accidentally pulled an all-nighter and didn't realize the sun was already up.
 
 # Everything else
 
