@@ -15,7 +15,7 @@ jQuery(function($) {
   // var nextSunrise = moment(lastSunrise).add(24, 'seconds');
     
   // set default starting position
-  var position = {coords:{
+  var position = $.cookie('position') || {coords:{
     latitude: 40.7121681,
     longitude: -73.96068679999999
   }};
@@ -29,6 +29,7 @@ jQuery(function($) {
     
   function updatePosition(newPosition) {
     position = newPosition;
+    $.cookie('position', position);
     updateTime();
   }
   
