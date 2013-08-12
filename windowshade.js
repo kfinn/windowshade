@@ -14,8 +14,16 @@ jQuery(function($) {
   // var sunset = moment(lastSunrise).add(14, 'seconds');
   // var nextSunrise = moment(lastSunrise).add(24, 'seconds');
     
-  // set default starting position
-  var position = $.cookie('position') || {coords:{
+  // try to get cookie position
+  var cookiePosition = false;
+  try {
+    var cookiePosition = JSON.parse($.cookie('position'));
+  } catch(e) {
+    $.removeCookie('position');
+  }
+  
+  // set position to stored cookie position or a default (Brooklyn)
+  var position = cookiePosition || {coords:{
     latitude: 40.7121681,
     longitude: -73.96068679999999
   }};
