@@ -11,7 +11,14 @@ var gradients = [
 
 jQuery(function($) {
   // set default starting position
-  var position = $.cookie('position') || {coords:{
+  var cookiePosition = false;
+  try {
+    var cookiePosition = JSON.parse($.cookie('position'));
+  } catch(e) {
+    $.removeCookie('position');
+  }
+  
+  var position = cookiePosition || {coords:{
     latitude: 40.7121681,
     longitude: -73.96068679999999
   }};
@@ -19,13 +26,13 @@ jQuery(function($) {
   var container = $('#container');
   var dark = false;
   
-  navigator.geolocation.getCurrentPosition(updatePosition);
   updateTime();
   window.setInterval(updateTime, 500);
+  navigator.geolocation.getCurrentPosition(updatePosition);
     
   function updatePosition(newPosition) {
     position = newPosition;
-    $.cookie('position', position);
+    $.cookie('position', JSON.stringify(position));
     updateTime();
   }
   
