@@ -22,7 +22,6 @@ jQuery(function($) {
     $.removeCookie('position');
   }
   
-  // set position to stored cookie position or a default (Brooklyn)
   var position = cookiePosition || {coords:{
     latitude: 40.7121681,
     longitude: -73.96068679999999
@@ -31,13 +30,13 @@ jQuery(function($) {
   var container = $('#container');
   var dark = false;
   
-  navigator.geolocation.getCurrentPosition(updatePosition);
   updateTime();
   window.setInterval(updateTime, 500);
+  navigator.geolocation.getCurrentPosition(updatePosition);
     
   function updatePosition(newPosition) {
     position = newPosition;
-    $.cookie('position', position);
+    $.cookie('position', JSON.stringify(position));
     updateTime();
   }
   
