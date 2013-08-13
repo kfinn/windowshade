@@ -31,13 +31,13 @@ jQuery(function($) {
   var container = $('#container');
   var dark = false;
   
+  navigator.geolocation.getCurrentPosition(updatePosition);
   updateTime();
   window.setInterval(updateTime, 500);
-  navigator.geolocation.getCurrentPosition(updatePosition);
     
   function updatePosition(newPosition) {
     position = newPosition;
-    $.cookie('position', JSON.stringify(position));
+    $.cookie('position', position);
     updateTime();
   }
   
@@ -78,6 +78,22 @@ jQuery(function($) {
       timeSpanEnd = tomorrowSunData.sunrise;
       setDark(true);
     }
+  
+    //debug
+    // if (now.isAfter(nextSunrise)) {
+    //   lastSunrise.add(24, 'seconds');
+    //   sunset.add(24, 'seconds');
+    //   nextSunrise.add(24, 'seconds');
+    // }
+    // if (now.isBefore(sunset)) {
+    //    timeSpanStart = lastSunrise;
+    //    timeSpanEnd =  sunset;
+    //    setDark(false);
+    // } else {
+    //   timeSpanStart = sunset;
+    //   timeSpanEnd = nextSunrise
+    //   setDark(true);
+    // }
   
     var elapsed = now.diff(timeSpanStart, 'milliseconds');
     var total = timeSpanEnd.diff(timeSpanStart, 'milliseconds');
